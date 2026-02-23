@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OrdersSystem.Models;
 using OrdersSystem.Services;
+using OrdersSystem.DTOs;
 
 namespace OrdersSystem.UserInterface
 {
@@ -103,13 +103,13 @@ namespace OrdersSystem.UserInterface
         {
             if (_engine.CustomersListCount() > 0)
             {
-                List<Customer> customersList = _engine.GetCustomersList();
+                List<CustomerDTO> customersList = _engine.GetCustomersList();
 
                 Console.WriteLine("Customers:");
                 Console.WriteLine("===============================");
-                foreach (Customer c in customersList)
+                foreach (CustomerDTO c in customersList)
                 {
-                    Console.WriteLine($"ID: {c.CustomerId}, Name: {c.CustomerName}");
+                    Console.WriteLine($"ID: {c.Id}, Name: {c.Name}");
                 }
                 Console.WriteLine("===============================");
             }
@@ -121,12 +121,12 @@ namespace OrdersSystem.UserInterface
         {
             if (_engine.ProductsListCount() > 0)
             {
-                List<Product> productsList = _engine.GetProductsList();
+                List<ProductDTO> productsList = _engine.GetProductsList();
                 Console.WriteLine("Products:");
                 Console.WriteLine("===============================");
-                foreach (Product p in productsList)
+                foreach (ProductDTO p in productsList)
                 {
-                    Console.WriteLine($"ID: {p.ProductId}, Name: {p.ProductName}, Price: {p.ProductPrice}");
+                    Console.WriteLine($"ID: {p.Id}, Name: {p.Name}, Price: {p.Price}");
                 }
                 Console.WriteLine("===============================");
             }
@@ -142,21 +142,21 @@ namespace OrdersSystem.UserInterface
                 return;
             }
 
-            List<Order> ordersList = _engine.GetOrdersList();
-            List<Product> productsList = _engine.GetProductsList();
-            List<Customer> customersList = _engine.GetCustomersList();
+            List<OrderDTO> ordersList = _engine.GetOrdersList();
+            List<ProductDTO> productsList = _engine.GetProductsList();
+            List<CustomerDTO> customersList = _engine.GetCustomersList();
 
             var res =
                 from o in ordersList
-                join p in productsList on o.ProductId equals p.ProductId
-                join c in customersList on o.CustomerId equals c.CustomerId
-                select new { o.OrderId, Customer = c, Product = p, o.Quantity };
+                join p in productsList on o.ProductId equals p.Id
+                join c in customersList on o.CustomerId equals c.Id
+                select new { o.Id, Customer = c, Product = p, o.Quantity };
 
             Console.WriteLine("Orders placed:");
             Console.WriteLine("===============================");
             foreach (var o in res)
             {
-                Console.WriteLine($"ID: {o.OrderId}, Customer: {o.Customer.CustomerName}, Product: {o.Product.ProductName}, Quantity: {o.Quantity}");
+                Console.WriteLine($"ID: {o.Id}, Customer: {o.Customer.Name}, Product: {o.Product.Name}, Quantity: {o.Quantity}");
                 Console.WriteLine("===============================");
             }
         }
@@ -210,7 +210,7 @@ namespace OrdersSystem.UserInterface
             while (true)
             {
                 string input = ReadInputOrExit();
-                if (int.TryParse(input, out customerId) && customers.Exists(c => c.CustomerId == customerId))
+                if (int.TryParse(input, out customerId) && customers.Exists(c => c.Id == customerId))
                     break;
 
                 Console.WriteLine("Invalid customer Id. Try again, use the one from list above:");
@@ -222,7 +222,7 @@ namespace OrdersSystem.UserInterface
             while (true)
             {
                 string input = ReadInputOrExit();
-                if (int.TryParse(input, out productId) && products.Exists(p => p.ProductId == productId))
+                if (int.TryParse(input, out productId) && products.Exists(p => p.Id == productId))
                     break;
 
                 Console.WriteLine("Invalid product Id. Try again, use the one from list above:");
@@ -260,7 +260,7 @@ namespace OrdersSystem.UserInterface
             while (true)
             {
                 string input = ReadInputOrExit();
-                if (int.TryParse(input, out int orderId) && _engine.GetOrdersList().Exists(o => o.OrderId == orderId))
+                if (int.TryParse(input, out int orderId) && _engine.GetOrdersList().Exists(o => o.Id == orderId))
                 {
                     if (_engine.RemoveOrder(orderId))
                         Console.WriteLine("Order removed successfully.");
@@ -288,7 +288,7 @@ namespace OrdersSystem.UserInterface
             while (true)
             {
                 string input = ReadInputOrExit();
-                if (int.TryParse(input, out int customerId) && _engine.GetCustomersList().Exists(c => c.CustomerId == customerId))
+                if (int.TryParse(input, out int customerId) && _engine.GetCustomersList().Exists(c => c.Id == customerId))
                 {
                     if (_engine.RemoveCustomer(customerId))
                         Console.WriteLine("Customer removed successfully.");
@@ -316,7 +316,7 @@ namespace OrdersSystem.UserInterface
             while (true)
             {
                 string input = ReadInputOrExit();
-                if (int.TryParse(input, out int productId) && _engine.GetProductsList().Exists(p => p.ProductId == productId))
+                if (int.TryParse(input, out int productId) && _engine.GetProductsList().Exists(p => p.Id == productId))
                 {
                     if (_engine.RemoveProduct(productId))
                         Console.WriteLine("Product removed successfully.");

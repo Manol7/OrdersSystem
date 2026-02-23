@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using OrdersSystem.Models;
 using OrdersSystem.Interfaces;
+using OrdersSystem.DTOs;
 
 namespace OrdersSystem.Services
 {
@@ -19,9 +20,29 @@ namespace OrdersSystem.Services
             _productRepo = productRepo;
             _orderRepo = orderRepo;
         }
-        public List<Customer> GetCustomersList() => _customerRepo.GetAll();
-        public List<Product> GetProductsList() => _productRepo.GetAll();
-        public List<Order> GetOrdersList() => _orderRepo.GetAll();
+        private CustomerDTO ToDTO(Customer customer) => new CustomerDTO
+        {
+            Id = customer.CustomerId,
+            Name = customer.CustomerName
+        };
+
+        private ProductDTO ToDTO(Product product) => new ProductDTO
+        {
+            Id = product.ProductId,
+            Name = product.ProductName,
+            Price = product.ProductPrice
+        };
+
+        private OrderDTO ToDTO(Order order) => new OrderDTO
+        {
+            Id = order.OrderId,
+            CustomerId = order.CustomerId,
+            ProductId = order.ProductId,
+            Quantity = order.Quantity
+        };
+        public List<CustomerDTO> GetCustomersList() => _customerRepo.GetAll().Select(ToDTO).ToList();
+        public List<ProductDTO> GetProductsList() => _productRepo.GetAll().Select(ToDTO).ToList();
+        public List<OrderDTO> GetOrdersList() => _orderRepo.GetAll().Select(ToDTO).ToList();
         public bool CheckString(string str) => !string.IsNullOrEmpty(str) && str.All(char.IsLetter);
         public int CustomersListCount() => _customerRepo.GetAll().Count;
         public int ProductsListCount() => _productRepo.GetAll().Count;
