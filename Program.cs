@@ -15,7 +15,13 @@ namespace OrdersSystem
 
             var Engine = new Engine(CustomerRepo, ProductRepo, OrderRepo);
             var Ui = new Ui(Engine);
-
+            Engine.AddProduct("Laptop", 1500);
+            Engine.AddProduct("Phone", 800);
+            Engine.AddCustomer("Alice");
+            Engine.AddCustomer("John");
+            Engine.AddOrder(1, 1, 2);
+            Engine.AddOrder(1, 2, 5);
+            Engine.AddOrder(2, 2, 15);
             Ui.Run();
         }
     }

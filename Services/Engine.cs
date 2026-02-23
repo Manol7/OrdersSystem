@@ -1,17 +1,19 @@
-﻿using OrdersSystem.Models;
-using OrdersSystem.Repositories;
+﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Linq;
+using OrdersSystem.Models;
+using OrdersSystem.Interfaces;
 
 namespace OrdersSystem.Services
 {
     public class Engine
     {
-        private readonly CustomerRepository _customerRepo;
-        private readonly ProductRepository _productRepo;
-        private readonly OrderRepository _orderRepo;
+        private readonly ICustomerRepository _customerRepo;
+        private readonly IProductRepository _productRepo;
+        private readonly IOrderRepository _orderRepo;
 
-        public Engine(CustomerRepository customerRepo, ProductRepository productRepo, OrderRepository orderRepo)
+        public Engine(ICustomerRepository customerRepo, IProductRepository productRepo, IOrderRepository orderRepo)
         {
             _customerRepo = customerRepo;
             _productRepo = productRepo;
@@ -26,21 +28,20 @@ namespace OrdersSystem.Services
         public int OrdersListCount() => _orderRepo.GetAll().Count;
         public bool AddCustomer(string name)
         {
-            if (_customerRepo.Exists(name)) return false; 
+            if (_customerRepo.Exists(name)) return false;
             var newCustomer = new Customer(_customerRepo.GetNextId(), name);
             _customerRepo.Add(newCustomer);
             return true;
         }
         public bool AddProduct(string name, decimal price)
         {
-            if(_productRepo.Exists(name)) return false;
+            if (_productRepo.Exists(name)) return false;
             var newProduct = new Product(_productRepo.GetNextId(), name, price);
             _productRepo.Add(newProduct);
             return true;
         }
         public bool AddOrder(int customerId, int productId, int quantity)
         {
-            if (_orderRepo.Exists(customerId)) return false;
             if (_customerRepo.Exists(customerId) && _productRepo.Exists(productId))
             {
                 var newOrder = new Order(_orderRepo.GetNextId(), customerId, productId, quantity);
@@ -57,6 +58,42 @@ namespace OrdersSystem.Services
                 if (orderToRemove != null)
                 {
                     _orderRepo.Remove(orderToRemove);
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool RemoveCustomer(int customerId)
+        {
+            if (_customerRepo.Exists(customerId))
+            {
+                var customerToRemove = _customerRepo.GetAll().FirstOrDefault(c => c.CustomerId == customerId);
+                var ordersToRemove = _orderRepo.GetAll().Where(o => o.CustomerId == customerId).ToList();
+                if (customerToRemove != null)
+                {
+                    foreach (var order in ordersToRemove)
+                    {
+                        _orderRepo.Remove(order);
+                    }
+                    _customerRepo.Remove(customerToRemove);
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool RemoveProduct(int productId)
+        {
+            if (_productRepo.Exists(productId))
+            {
+                var productToRemove = _productRepo.GetAll().FirstOrDefault(p => p.ProductId == productId);
+                var ordersToRemove = _orderRepo.GetAll().Where(o => o.ProductId == productId).ToList();
+                if (productToRemove != null)
+                {
+                    foreach (var order in ordersToRemove)
+                    {
+                        _orderRepo.Remove(order);
+                    }
+                    _productRepo.Remove(productToRemove);
                     return true;
                 }
             }
